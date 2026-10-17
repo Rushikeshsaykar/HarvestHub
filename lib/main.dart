@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:harvesthub/auth/signup_screen.dart';
+import 'package:harvesthub/pages/onbording_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +17,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
     
       theme: ThemeData(colorScheme: .fromSeed(seedColor: const Color.fromARGB(255, 8, 120, 22))),
-      home: SignupScreen(),
+      home: OnbordingScreen(
+        
+      ),
     );
   }
 }
