@@ -115,6 +115,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             filled: true,
                             fillColor: const Color.fromARGB(109, 255, 255, 255),
                             hintText: "Enter number",
+                            hintStyle: TextStyle(color: const Color.fromARGB(255, 227, 223, 223)),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
                             ),
