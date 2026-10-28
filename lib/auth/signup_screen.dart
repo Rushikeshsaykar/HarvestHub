@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:harvesthub/auth/otpverification_screen.dart';
 import 'package:harvesthub/weidget/bricolagetext.dart';
-import 'package:harvesthub/weidget/custombutton.dart';
 import 'package:harvesthub/weidget/plustextjak.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 class SignupScreen extends StatefulWidget {
   const new({super.key});
@@ -13,6 +15,60 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   final phoneController = TextEditingController();
+
+
+  bool _isLoading = false;
+
+@override
+void dispose() {
+  phoneController.dispose();
+  super.dispose();
+}
+
+Future<void> sendOtp() async {
+  if (!_formKey.currentState!.validate()) return;
+
+  final phone = '+91${phoneController.text.trim()}';
+  setState(() => _isLoading = true);
+
+  await FirebaseAuth.instance.verifyPhoneNumber(
+    phoneNumber: phone,
+    timeout: const Duration(seconds: 60),
+
+    // Android may auto-read the SMS and verify instantly
+    verificationCompleted: (PhoneAuthCredential credential) async {
+      await FirebaseAuth.instance.signInWithCredential(credential);
+      // TODO: navigate to home if you want to handle auto-verification
+    },
+
+    verificationFailed: (FirebaseAuthException e) {
+  debugPrint('OTP ERROR code: ${e.code} | message: ${e.message}');
+  if (!mounted) return;
+  setState(() => _isLoading = false);
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('${e.code}: ${e.message}')),
+  );
+},
+
+    // SMS sent: go to the OTP screen
+    codeSent: (String verificationId, int? resendToken) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => OtpScreen(
+            verificationId: verificationId,
+            resendToken: resendToken,
+            phone: phone,
+          ),
+        ),
+      );
+    },
+
+    codeAutoRetrievalTimeout: (String verificationId) {},
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +171,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             filled: true,
                             fillColor: const Color.fromARGB(109, 255, 255, 255),
                             hintText: "Enter number",
-                            hintStyle: TextStyle(color: const Color.fromARGB(255, 227, 223, 223)),
+                            hintStyle: TextStyle(color: const Color.fromARGB(255, 193, 192, 192)),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
                             ),
@@ -134,27 +190,31 @@ class _SignupScreenState extends State<SignupScreen> {
                         width: double.infinity,
                         height: 56,
                         child: ElevatedButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              // valid: send OTP
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2E7D32),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Text(
-                            "Send OTP",
-                            style: TextStyle(
-                              fontFamily: "plusjak",
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
+  onPressed: _isLoading ? null : sendOtp,
+  style: ElevatedButton.styleFrom(
+    backgroundColor: const Color(0xFF2E7D32),
+    foregroundColor: Colors.white,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+  ),
+  child: _isLoading
+      ? const SizedBox(
+          height: 22,
+          width: 22,
+          child: CircularProgressIndicator(
+            color: Colors.white,
+            strokeWidth: 2.5,
+          ),
+        )
+      : const Text(
+          "Send OTP",
+          style: TextStyle(
+            fontFamily: "plusjak",
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+),),
                       SizedBox(height: 35),
                       Container(
                        decoration: BoxDecoration(

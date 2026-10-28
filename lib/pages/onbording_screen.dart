@@ -12,14 +12,14 @@ class OnbordingScreen extends StatefulWidget {
 }
 
 class _OnbordingScreenState extends State<OnbordingScreen> {
-  var _image = null;
+  final _image=null;
   late final useris;
   Border ontabBorder = Border.all(color: Colors.green, width: 2);
   Color ontab = const Color.fromARGB(160, 186, 217, 188);
   TextEditingController nameControler = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold(resizeToAvoidBottomInset: false,
       backgroundColor: Color.fromARGB(255, 231, 229, 229),
       body: SafeArea(
         child: Padding(
